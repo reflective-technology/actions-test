@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main # Adjust if needed
+    paths:
+      - "Cargo.toml"
 
 permissions:
   contents: write # Required to push new tags
@@ -37,10 +39,16 @@ jobs:
           else
             echo "TAG_EXISTS=false" >> $GITHUB_ENV
           fi
+      - name: Generate a token
+        id: generate-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
       - name: Push tag
         id: tag_version
-        uses: mathieudutour/github-tag-action@v6.2
+        uses: mathieudutour/github-tag-action@a22cf08638b34d5badda920f9daf6e72c477b07b
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ steps.generate-token.outputs.token }}
           tag_prefix: "v"
           custom_tag: ${{ steps.get_version.outputs.value }}
