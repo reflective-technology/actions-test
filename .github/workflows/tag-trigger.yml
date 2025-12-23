@@ -1,9 +1,10 @@
 name: Tag Triggered Workflow
 
 on:
-  push:
-    tags:
-      - "v*"  # Runs only when a tag starting with "v" is created
+  workflow_run:
+    workflows: ["Auto Version Tagging"]
+    types:
+      - completed
 
 jobs:
   say-hello:
@@ -12,4 +13,12 @@ jobs:
       - name: Print Hello World
         run: |
           echo "Hello, World! A new tag was created: ${{ github.ref }}"
-  
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051
+        with:
+          images: ghcr.io/vincentzuso/aplang
+      - name: Show Docker meta output
+        run: |
+          echo "Tags: ${{ steps.meta.outputs.tags }}"
+          echo "Labels: ${{ steps.meta.outputs.labels }}"
